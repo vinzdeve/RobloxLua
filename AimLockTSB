@@ -1,3 +1,13 @@
+--[[
+    AimLock Legit Plus+
+    Created by @devzinh and @vinzdeve
+    Discord: https://discord.gg/J37PW97j6a
+    
+    Please keep credits if you modify this code.
+    Be mindful and respect the creator's work.
+]]--
+
+-- Services
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -5,13 +15,22 @@ local StarterGui = game:GetService("StarterGui")
 
 -- Constants
 local NOTIFICATION_COOLDOWN = 1.5 -- Minimum time between notifications (in seconds)
+local TARGET_CHECK_INTERVAL = 0.00001 -- Target check interval (in seconds)
+local DEFAULT_CONFIG = {
+    Active = false, -- do not change this
+    Prediction = 0.145, -- Target movement prediction value (higher = more anticipation)
+    TargetPart = "HumanoidRootPart", -- Body part that aimlock will target. Can also be "Head", "UpperTorso", "LowerTorso", "LeftUpperLeg", "RightUpperLeg", "LeftLowerLeg", "RightLowerLeg", "LeftFoot", "RightFoot", "Neck", "LeftShoulder", "RightShoulder", "LeftUpperArm", "RightUpperArm", "LeftLowerArm", "RightLowerArm", "LeftHand", "RightHand"
+    Smoothness = 1, -- Camera movement smoothness (0 = instant, 1 = very smooth)
+    MaxRadius = 300, -- Maximum distance to find targets
+    MinimumDistance = 10, -- Minimum distance to activate aimlock, recommended to keep at 10
+    DeactivationSensitivity = 0.5 -- Sensitivity to deactivate aimlock, recommended to keep at 0.5
+}
 
 StarterGui:SetCore("SendNotification", {
     Title = "AimLock Legit Plus+",
-    Text = "@devzinh and @vinzdeve",
+    Text = "Created by @devzinh and @vinzdeve",
     Duration = 1
 })
-
 
 -- State
 local State = {
@@ -33,7 +52,7 @@ local function SendNotification(active)
     if currentTime - State.LastNotification >= NOTIFICATION_COOLDOWN then
         StarterGui:SetCore("SendNotification", {
             Title = "AimLock Legit Plus+",
-            Text = active and "Activated" or "Deactivated",
+            Text = active and "Aimlock Activated" or "Aimlock Deactivated",
             Duration = 1
         })
         State.LastNotification = currentTime
@@ -96,6 +115,30 @@ local function UpdateAimLock()
     
     Camera.CFrame = Camera.CFrame:Lerp(newCFrame, DEFAULT_CONFIG.Smoothness)
 end
+
+-- Input Handling
+-- To change the aimlock key, change "Enum.KeyCode.LeftControl" to the desired key
+-- Example: Enum.KeyCode.E to use the E key
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.LeftControl then
+        State.ControlPressed = true
+        DEFAULT_CONFIG.Active = not DEFAULT_CONFIG.Active
+        
+        if DEFAULT_CONFIG.Active then
+            State.LockedTarget = FindNearestPlayer()
+        else
+            State.LockedTarget = nil
+        end
+        
+        SendNotification(DEFAULT_CONFIG.Active)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.LeftControl then 
+        State.ControlPressed = false
+    end
+end)
 
 -- Main Loop
 RunService.RenderStepped:Connect(function()
