@@ -1,3 +1,8 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
+
 -- Constants
 local NOTIFICATION_COOLDOWN = 1.5 -- Minimum time between notifications (in seconds)
 
